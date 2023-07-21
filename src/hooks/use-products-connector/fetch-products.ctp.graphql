@@ -1,0 +1,35 @@
+query FetchProducts($limit: Int!, $offset: Int, $sort: [String!]) {
+  products(limit: $limit, offset: $offset, sort: $sort) {
+    ...CurrentProduct
+  }
+}
+
+fragment Product on ProductData {
+  nameAllLocales {
+    locale
+    value
+  }
+  masterVariant {
+    sku
+  }
+}
+
+fragment CurrentProduct on ProductQueryResult {
+  results {
+    id
+    masterData {
+      current {
+        ...Product
+      }
+      published
+    }
+    productType {
+      key
+      name
+    }
+    key
+    createdAt
+    lastModifiedAt
+  }
+  total
+}
