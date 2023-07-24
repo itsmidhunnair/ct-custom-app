@@ -4,7 +4,6 @@ import {
   formatLocalizedString,
 } from '@commercetools-frontend/l10n';
 
-
 export const getErrorMessage = (error) =>
   error.graphQLErrors?.map((e) => e.message).join('\n') || error.message;
 
@@ -48,4 +47,14 @@ export const convertToActionData = (draft) => ({
   name: transformLocalizedFieldToLocalizedString(draft.nameAllLocales || []),
 });
 
-
+/**
+ * To Toggle Values from array update the state variable with the new value
+ *
+ * @param {{array:Array, setArray:Function, value:String}}
+ */
+export const toggleElementFromArray = ({ array, setArray, value }) => {
+  const newArr = array.includes(value)
+    ? array.filter((id) => id !== value)
+    : [...array, value];
+  setArray(newArr);
+};

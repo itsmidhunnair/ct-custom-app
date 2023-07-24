@@ -1,6 +1,6 @@
 import { ContentNotification } from '@commercetools-uikit/notifications';
 import React, { useEffect } from 'react';
-import { getErrorMessage } from '../../helpers';
+import { getErrorMessage, toggleElementFromArray } from '../../helpers';
 import { useProductsFetcher } from '../../hooks/use-products-connector';
 import Text from '@commercetools-uikit/text';
 import DataTable from '@commercetools-uikit/data-table';
@@ -18,6 +18,7 @@ import { Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { SuspendedRoute } from '@commercetools-frontend/application-shell';
 import ChannelDetails from '../channel-details';
 import useLocalLang from '../../hooks/use-local-lang/useLocalLang';
+import { useState } from 'react';
 
 const Products = () => {
   const { page, perPage } = usePaginationState();
@@ -25,6 +26,12 @@ const Products = () => {
     key: 'key',
     order: 'asc',
   });
+
+  const [selectedProduct, setSelectedProduct] = useState([]);
+  console.log(
+    '🚀 ~ file: products.jsx:31 ~ Products ~ selectedProduct:',
+    selectedProduct
+  );
 
   const { push } = useHistory();
   const match = useRouteMatch();
@@ -85,17 +92,30 @@ const Products = () => {
       key: 'checkbox',
       label: (
         <CheckboxInput
-        // isIndeterminate={isSelectColumnHeaderIndeterminate}
-        // isChecked={countSelectedRows !== 0}
-        // onChange={handleSelectColumnHeaderChange}
+          // isIndeterminate={isSelectColumnHeaderIndeterminate}
+          isChecked={selectedProduct.length === perPage.value}
+          onChange={(e) => {
+            if (e.target.checked) {
+              const ids = data.results.map((item) => item.id);
+              setSelectedProduct(ids);
+            } else {
+              setSelectedProduct([]);
+            }
+          }}
         />
       ),
       shouldIgnoreRowClick: true,
       align: 'center',
       renderItem: (row) => (
         <CheckboxInput
-        // isChecked={getIsRowSelected(row.id)}
-        // onChange={() => toggleRow(row.id)}
+          isChecked={selectedProduct.includes(row.id)}
+          onChange={() => {
+            toggleElementFromArray({
+              array: selectedProduct,
+              setArray: setSelectedProduct,
+              value: row.id,
+            });
+          }}
         />
       ),
       disableResizing: true,

@@ -34,8 +34,8 @@ const config = {
       permissions: [PERMISSIONS.View],
     },
     {
-      uriPath: 'demo-channels',
-      defaultLabel: 'Deno Channels',
+      uriPath: 'products',
+      defaultLabel: 'Products',
       labelAllLocales: [],
       permissions: [PERMISSIONS.View],
     },

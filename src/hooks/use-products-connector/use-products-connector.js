@@ -24,7 +24,10 @@ export const useProductsFetcher = ({ page, perPage, tableSorting }) => {
 };
 
 export const useProductDetailsFetcher = ({ id }) => {
-  console.log("🚀 ~ file: use-products-connector.js:27 ~ useProductDetailsFetcher ~ id:", id)
+  console.log(
+    '🚀 ~ file: use-products-connector.js:27 ~ useProductDetailsFetcher ~ id:',
+    id
+  );
   const { data, error, loading } = useMcQuery(GetProductDetails, {
     variables: {
       id,
@@ -33,6 +36,9 @@ export const useProductDetailsFetcher = ({ id }) => {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
   });
-  console.log("🚀 ~ file: use-products-connector.js:36 ~ useProductDetailsFetcher ~ data:", data)
-  return { data: data?.product, loading, error };
+  console.log(
+    '🚀 ~ file: use-products-connector.js:36 ~ useProductDetailsFetcher ~ data:',
+    data
+  );
+  return { product: data?.product, loading, error };
 };

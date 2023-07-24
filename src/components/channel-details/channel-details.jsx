@@ -32,7 +32,6 @@ import { ApplicationPageTitle } from '@commercetools-frontend/application-shell'
 const ChannelDetails = (props) => {
   const intl = useIntl();
   const params = useParams();
-  console.log("🚀 ~ file: channel-details.jsx:35 ~ ChannelDetails ~ params:", params)
   
   const { loading, error, channel } = useChannelDetailsFetcher(params.id);
   const { dataLocale, projectLanguages } = useApplicationContext((context) => ({

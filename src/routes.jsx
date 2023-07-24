@@ -2,8 +2,8 @@ import { Switch, Route, useRouteMatch, useHistory } from 'react-router-dom';
 import Spacings from '@commercetools-uikit/spacings';
 import Channels from './components/channels';
 import Welcome from './components/welcome';
-import Products from './components/demo-component';
-import ProductDetails from './components/demo-component/product-details';
+import Products from './components/products';
+import ProductDetails from './components/product-details';
 
 const ApplicationRoutes = () => {
   const match = useRouteMatch();
@@ -27,7 +27,7 @@ const ApplicationRoutes = () => {
         <Route path={`${match.path}/channels`}>
           <Channels linkToWelcome={match.url} />
         </Route>
-        <Route path={`${match.path}/demo-channels`}>
+        <Route path={`${match.path}/products`}>
           <Products linkToWelcome={match.url} />
         </Route>
         <Route>
@@ -35,9 +35,9 @@ const ApplicationRoutes = () => {
         </Route>
       </Switch>
       <Switch>
-        <Route path={`${match.path}/demo-channels/:id`}>
+        <Route path={`${match.path}/products/:id`}>
           <ProductDetails
-            onClose={() => push(`${match.url}/demo-channels`)}
+            onClose={() => push(`${match.url}/products`)}
             linkToWelcome={match.url}
           />
         </Route>

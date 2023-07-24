@@ -14,7 +14,10 @@ query GetProductDetails($id: String) {
       name
       description
     }
+    priceMode
     masterData {
+      published
+      hasStagedChanges
       staged {
         ...Product
       }
@@ -22,10 +25,19 @@ query GetProductDetails($id: String) {
         ...Product
       }
     }
+    createdAt
+    lastModifiedAt
   }
 }
 fragment Product on ProductData {
   skus
+  categories {
+    key
+    nameAllLocales {
+      locale
+      value
+    }
+  }
   nameAllLocales {
     locale
     value
@@ -36,6 +48,13 @@ fragment Product on ProductData {
     attributesRaw {
       name
       value
+    }
+    prices {
+      value {
+        currencyCode
+        centAmount
+        fractionDigits
+      }
     }
   }
 }
