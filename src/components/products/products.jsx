@@ -7,6 +7,7 @@ import DataTable from '@commercetools-uikit/data-table';
 import Stamp from '@commercetools-uikit/stamp';
 import DataTableManager from '@commercetools-uikit/data-table-manager';
 import Spacings from '@commercetools-uikit/spacings';
+import SpacingsInline from '@commercetools-uikit/spacings-inline';
 import CheckboxInput from '@commercetools-uikit/checkbox-input';
 import { Pagination } from '@commercetools-uikit/pagination';
 import {
@@ -19,6 +20,16 @@ import { SuspendedRoute } from '@commercetools-frontend/application-shell';
 import ChannelDetails from '../channel-details';
 import useLocalLang from '../../hooks/use-local-lang/useLocalLang';
 import { useState } from 'react';
+import SelectInput from '@commercetools-uikit/select-input';
+import Grid from '@commercetools-uikit/grid';
+import { BinLinearIcon, DotIcon } from '@commercetools-uikit/icons';
+import { ActionSelectOption } from './constants/components';
+import { useUpdateAction } from '../../hooks/use-products-connector/use-products-connector';
+import { useShowNotification } from '@commercetools-frontend/actions-global';
+import {
+  DOMAINS,
+  NOTIFICATION_KINDS_SIDE,
+} from '@commercetools-frontend/constants';
 
 const Products = () => {
   const { page, perPage } = usePaginationState();
@@ -27,18 +38,18 @@ const Products = () => {
     order: 'asc',
   });
 
+  const [action, setAction] = useState();
   const [selectedProduct, setSelectedProduct] = useState([]);
-  console.log(
-    '🚀 ~ file: products.jsx:31 ~ Products ~ selectedProduct:',
-    selectedProduct
-  );
-
   const { push } = useHistory();
   const match = useRouteMatch();
 
+  const showNotification = useShowNotification();
+
   const { getLocalName } = useLocalLang();
 
-  const { data, error, loading } = useProductsFetcher({
+  const { updateProductAction } = useUpdateAction();
+
+  const { data, error, loading, refetch } = useProductsFetcher({
     page,
     perPage,
     tableSorting,
@@ -92,11 +103,17 @@ const Products = () => {
       key: 'checkbox',
       label: (
         <CheckboxInput
-          // isIndeterminate={isSelectColumnHeaderIndeterminate}
+          isIndeterminate={
+            selectedProduct.length < perPage.value && selectedProduct.length > 0
+          }
           isChecked={selectedProduct.length === perPage.value}
           onChange={(e) => {
             if (e.target.checked) {
-              const ids = data.results.map((item) => item.id);
+              const ids = data.results.map((item) => ({
+                id: item.id,
+                version: item.version,
+                isPublished: item.masterData.published,
+              }));
               setSelectedProduct(ids);
             } else {
               setSelectedProduct([]);
@@ -108,12 +125,16 @@ const Products = () => {
       align: 'center',
       renderItem: (row) => (
         <CheckboxInput
-          isChecked={selectedProduct.includes(row.id)}
+          isChecked={selectedProduct.some((prod) => prod.id === row.id)}
           onChange={() => {
             toggleElementFromArray({
               array: selectedProduct,
               setArray: setSelectedProduct,
-              value: row.id,
+              value: {
+                id: row.id,
+                version: row.version,
+                isPublished: row.masterData.published,
+              },
             });
           }}
         />
@@ -147,6 +168,84 @@ const Products = () => {
         <Text.Headline as="h2">Products</Text.Headline>
         <Text.Body>All Products</Text.Body>
       </Spacings.Stack>
+      <SpacingsInline justifyContent="space-between">
+        <SpacingsInline alignItems="center">
+          <div
+            style={{
+              width: '200px',
+            }}
+          >
+            <SelectInput
+              name="action"
+              value={selectedProduct.length > 0 && action}
+              options={[
+                {
+                  value: 'publish',
+                  label: (
+                    <ActionSelectOption
+                      label="Published"
+                      type={selectedProduct.length > 0 && 'publish'}
+                    />
+                  ),
+                  isDisabled: selectedProduct.length === 0,
+                },
+                {
+                  value: 'unpublish',
+                  label: (
+                    <ActionSelectOption
+                      label="Unpublished"
+                      type={selectedProduct.length > 0 && 'unpublish'}
+                    />
+                  ),
+                  isDisabled: selectedProduct.length === 0,
+                },
+                {
+                  value: 'delete',
+                  label: (
+                    <ActionSelectOption
+                      label="Delete"
+                      type={selectedProduct.length > 0 && 'delete'}
+                    />
+                  ),
+                  isDisabled: selectedProduct.length === 0,
+                },
+              ]}
+              onChange={async (e) => {
+                try {
+                  setAction(e.target.value);
+                  await updateProductAction({
+                    action: e.target.value,
+                    products: selectedProduct,
+                  });
+                  refetch();
+                  setSelectedProduct([]);
+                  setAction();
+                  showNotification({
+                    kind: NOTIFICATION_KINDS_SIDE.success,
+                    domain: DOMAINS.SIDE,
+                    text: 'Product status updated successfully!',
+                  });
+                } catch (error) {
+                  showNotification({
+                    kind: NOTIFICATION_KINDS_SIDE.error,
+                    domain: DOMAINS.SIDE,
+                    text: error || 'Some Error Occured',
+                  });
+                }
+              }}
+            ></SelectInput>
+          </div>
+          {selectedProduct.length > 0 && (
+            <>
+              <Text.Detail tone="primary">{selectedProduct.length}</Text.Detail>
+              <Text.Detail>product selected</Text.Detail>
+            </>
+          )}
+        </SpacingsInline>
+        <SpacingsInline>
+          <SelectInput></SelectInput>
+        </SpacingsInline>
+      </SpacingsInline>
       <Spacings.Stack scale="xs">
         {data ? (
           <>

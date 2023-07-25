@@ -47,14 +47,36 @@ export const convertToActionData = (draft) => ({
   name: transformLocalizedFieldToLocalizedString(draft.nameAllLocales || []),
 });
 
+// /**
+//  * To Toggle Values from array update the state variable with the new value
+//  *
+//  * @param {{array:Array, setArray:Function, value:String}}
+//  */
+// export const toggleElementFromArray = ({ array, setArray, value }) => {
+//   const newArr = array.includes(value)
+//     ? array.filter((id) => id !== value)
+//     : [...array, value];
+//   setArray(newArr);
+// };
+
 /**
  * To Toggle Values from array update the state variable with the new value
  *
- * @param {{array:Array, setArray:Function, value:String}}
+ * @param {{array:Array, setArray:Function, value:{id:String, version:Int}}}
  */
 export const toggleElementFromArray = ({ array, setArray, value }) => {
-  const newArr = array.includes(value)
-    ? array.filter((id) => id !== value)
+  const newArr = array.some((arr) => {
+    if (arr.id === value.id) {
+      return true;
+    } else {
+      return false;
+    }
+  })
+    ? array.filter((arr) => arr.id !== value.id)
     : [...array, value];
+  console.log(
+    '🚀 ~ file: helpers.js:71 ~ toggleElementFromArray ~ newArr:',
+    newArr
+  );
   setArray(newArr);
 };

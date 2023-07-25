@@ -57,7 +57,9 @@ const ProductDetails = (props) => {
 
   console.log(
     '🚀 ~ file: product-details.jsx:27 ~ ProductDetails ~ product:',
-    product
+    formik.dirty,
+    formik.status,
+    formik.handleChange
   );
   return (
     <>

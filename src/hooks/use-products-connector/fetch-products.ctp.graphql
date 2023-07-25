@@ -28,6 +28,7 @@ fragment CurrentProduct on ProductQueryResult {
       name
     }
     key
+    version
     createdAt
     lastModifiedAt
   }
