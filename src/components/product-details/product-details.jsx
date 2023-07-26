@@ -18,7 +18,7 @@ import { useProductDetailsFetcher } from '../../hooks/use-products-connector';
 import useLocalLang from '../../hooks/use-local-lang/useLocalLang';
 import GeneralInformation from './sub-form/general/general-information';
 import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
-import { docToFormValues } from './conversions';
+import { docToFormValues, formValuesToDoc } from './conversions';
 import { useFormik } from 'formik';
 import SpacingsInline from '@commercetools-uikit/spacings-inline';
 import Label from '@commercetools-uikit/label';
@@ -27,7 +27,18 @@ import { useState } from 'react';
 import Stamp from '@commercetools-uikit/stamp';
 import IconButton from '@commercetools-uikit/icon-button';
 import { BinLinearIcon } from '@commercetools-uikit/icons';
-
+import { formatDateTime } from '../../helpers';
+import SaveToolBar from './sub-form/common/submitBtn';
+import { useEffect } from 'react';
+import {
+  useProductDetailsUpdater,
+  useUpdateAction,
+} from '../../hooks/use-products-connector/use-products-connector';
+import { useShowNotification } from '@commercetools-frontend/actions-global';
+import {
+  DOMAINS,
+  NOTIFICATION_KINDS_SIDE,
+} from '@commercetools-frontend/constants';
 // import { useProductDetails } from '../../hooks/use-products-connector';
 
 // import ProductDetialsForm from './productDetialsForm';
@@ -42,6 +53,8 @@ const ProductDetails = (props) => {
 
   const { getLocalName } = useLocalLang();
 
+  const productDetailUpdater = useProductDetailsUpdater();
+
   const { dataLocale, projectLanguages } = useApplicationContext((context) => ({
     dataLocale: context.dataLocale ?? '',
     projectLanguages: context.project?.languages ?? [],
@@ -51,9 +64,48 @@ const ProductDetails = (props) => {
     initialValues: docToFormValues(product, projectLanguages),
     dataLocale: dataLocale,
     enableReinitialize: true,
+    onSubmit: (values) => {
+      submitFormik(values);
+    },
   });
 
-  const [modified, setModified] = useState(formik.values.status);
+  const { updateProductAction } = useUpdateAction();
+  const showNotification = useShowNotification();
+
+  const submitFormik = async (values) => {
+    const data = formValuesToDoc(values);
+    console.log(
+      '🚀 ~ file: product-details.jsx:66 ~ submitFormik ~ data:',
+      data
+    );
+    try {
+      const data = await productDetailUpdater.execute({
+        oldDraft: product,
+        newDraft: values,
+      });
+      console.log(
+        '🚀 ~ file: product-details.jsx:78 ~ submitFormik ~ data:',
+        data
+      );
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: product-details.jsx:69 ~ submitFormik ~ error:',
+        error
+      );
+    }
+  };
+
+  const [modified, setModified] = useState();
+
+  useEffect(() => {
+    setModified(
+      product?.masterData.hasStagedChanges
+        ? 'modified'
+        : product?.masterData.published
+        ? 'publish'
+        : 'unpublish'
+    );
+  }, [product]);
 
   console.log(
     '🚀 ~ file: product-details.jsx:27 ~ ProductDetails ~ product:',
@@ -83,12 +135,36 @@ const ProductDetails = (props) => {
                   closeMenuOnSelect
                   // showOptionGroupDivider
                   placeholder={<Stamp tone="warning" label="Modified" />}
-                  onChange={(e) => {
-                    setModified(e.target.value);
+                  onChange={async (e) => {
+                    try {
+                      await updateProductAction({
+                        action: e.target.value,
+                        products: [
+                          {
+                            id: product.id,
+                            version: product.version,
+                            isPublished: product?.masterData.published,
+                            stagedChanges: product?.masterData.hasStagedChanges,
+                          },
+                        ],
+                      });
+                      showNotification({
+                        kind: NOTIFICATION_KINDS_SIDE.success,
+                        domain: DOMAINS.SIDE,
+                        text: 'Product status updated successfully!',
+                      });
+                      setModified(e.target.value);
+                    } catch (error) {
+                      showNotification({
+                        kind: NOTIFICATION_KINDS_SIDE.error,
+                        domain: DOMAINS.SIDE,
+                        text: error || 'Some Error Occured',
+                      });
+                    }
                   }}
                   options={[
                     {
-                      value: 'published',
+                      value: 'publish',
                       label: (
                         <Stamp
                           tone="positive"
@@ -102,7 +178,7 @@ const ProductDetails = (props) => {
                     //   label: <Stamp tone="warning" label="Modified" />,
                     // },
                     {
-                      value: 'unpublished',
+                      value: 'unpublish',
                       label: (
                         <Stamp
                           tone="critical"
@@ -134,28 +210,33 @@ const ProductDetails = (props) => {
           <div>
             <Spacings.Stack scale="m">
               <Switch>
-                <Route path={`${match.url}`} exact>
-                  <PageContentWide columns="2/1">
-                    <GeneralInformation data={formik} />
-                    <Spacings.Stack>
-                      <Text.Body tone="secondary">
-                        Date Created: {formik.values.createdAt}
-                      </Text.Body>
-                      <Text.Body tone="secondary">
-                        Date Modified: {formik.values.lastModifiedAt}
-                      </Text.Body>
-                    </Spacings.Stack>
-                  </PageContentWide>
-                </Route>
-                <Route path={`${match.url}/variant`} exact>
-                  {/* <ProductVariant /> */}
-                </Route>
-                <Route path={`${match.url}/search`} exact>
-                  <div>Serach</div>
-                </Route>
-                <Route path={`${match.url}/product-selection`} exact>
-                  <div>Product Selection</div>
-                </Route>
+                <form onSubmit={formik.handleSubmit}>
+                  <Route path={`${match.url}`} exact>
+                    <PageContentWide columns="2/1">
+                      <GeneralInformation data={formik} />
+                      <Spacings.Stack>
+                        <Text.Body tone="secondary">
+                          Date Created: {formatDateTime(product?.createdAt)}
+                        </Text.Body>
+                        <Text.Body tone="secondary">
+                          Date Modified:{' '}
+                          {formatDateTime(product?.lastModifiedAt)}
+                        </Text.Body>
+                      </Spacings.Stack>
+                    </PageContentWide>
+                  </Route>
+                  <Route path={`${match.url}/variant`} exact>
+                    {/* <ProductVariant /> */}
+                  </Route>
+                  <Route path={`${match.url}/search`} exact>
+                    <div>Serach</div>
+                  </Route>
+                  <Route path={`${match.url}/product-selection`} exact>
+                    <div>Product Selection</div>
+                  </Route>
+                  {/* <button type="submit">Submit</button> */}
+                  {formik.dirty && <SaveToolBar reset={formik.handleReset} />}
+                </form>
               </Switch>
             </Spacings.Stack>
           </div>

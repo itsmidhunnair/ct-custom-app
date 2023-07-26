@@ -8,7 +8,7 @@ import FieldLabel from '@commercetools-uikit/field-label';
 import useLocalLang from '../../../../hooks/use-local-lang/useLocalLang';
 import TextField from '@commercetools-uikit/text-field';
 import messages from '../../messages';
-import { useFormik } from 'formik';
+import { Formik, useFormik } from 'formik';
 import { docToFormValues } from '../../conversions';
 import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
 import Spacings from '@commercetools-uikit/spacings';
@@ -44,7 +44,8 @@ const GeneralInformation = ({ data }) => {
                 name="name"
                 value={data.values.name}
                 selectedLanguage="en"
-              />
+                onChange={data.handleChange}
+                />
             </Spacings.Stack>
             <Spacings.Stack scale="s">
               <FieldLabel
@@ -52,13 +53,14 @@ const GeneralInformation = ({ data }) => {
                 title={intl.formatMessage(messages.productDescriptionLabel)}
                 description={intl.formatMessage(
                   messages.productDescriptionLabelDesc
-                )}
-              />
+                  )}
+                  />
               <LocalizedTextInput
-                name="name"
-                value={data.values.name}
+                name="description"
+                value={data.values.description}
                 selectedLanguage="en"
-              />
+                onChange={data.handleChange}
+                />
             </Spacings.Stack>
             <Spacings.Stack scale="s">
               <FieldLabel

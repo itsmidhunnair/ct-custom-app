@@ -6,7 +6,9 @@ import { GRAPHQL_TARGETS } from '@commercetools-frontend/constants';
 
 import FetchProducts from './fetch-products.ctp.graphql';
 import GetProductDetails from './fetch-product-details.ctp.graphql';
-import UpdateProductStatus from './update-product-status.ctp.graphql';
+import UpdateProduct from './update-product.ctp.graphql';
+import { createSyncProducts } from '@commercetools/sync-actions';
+import { convertToActionData, createGraphQlUpdateActions } from '../../helpers';
 
 /**
  * To Fetch all Products
@@ -48,7 +50,7 @@ export const useProductDetailsFetcher = ({ id }) => {
  * Hook to perform Action on products
  */
 export const useUpdateAction = () => {
-  const [updateProductStatus] = useMcMutation(UpdateProductStatus);
+  const [updateProductStatus] = useMcMutation(UpdateProduct);
 
   /**
    * To update status on array of product
@@ -56,8 +58,18 @@ export const useUpdateAction = () => {
    * @param {{action:('publish'|'unpublish'), products:[{id:String, version:Int16Array, isPublished:boolean}]}}
    */
   const updateProductAction = async ({ action, products }) => {
+    console.log(
+      '🚀 ~ file: use-products-connector.js:61 ~ updateProductAction ~ action:',
+      action
+    );
+    console.log(
+      '🚀 ~ file: use-products-connector.js:61 ~ updateProductAction ~ products:',
+      products
+    );
     const filteredProducts = products.filter(
-      (product) => product.isPublished !== (action === 'publish' ? true : false)
+      (product) =>
+        product?.isPublished !== (action === 'publish' ? true : false) ||
+        product?.stagedChanges === true
     );
 
     const actionPayload =
@@ -92,4 +104,43 @@ export const useUpdateAction = () => {
     }
   };
   return { updateProductAction };
+};
+
+/**
+ * Hook to handle product detail update
+ */
+export const useProductDetailsUpdater = () => {
+  const [updateProductDetail, { loading }] = useMcMutation(UpdateProduct);
+
+  const syncStore = createSyncProducts();
+
+  const execute = async ({ oldDraft, newDraft }) => {
+    /**
+     * Will create an array of object by adding action names of updated fields
+     */
+    const actions = syncStore.buildActions(
+      newDraft,
+      convertToActionData(oldDraft)
+    );
+    try {
+      return updateProductDetail({
+        variables: {
+          id: oldDraft.id,
+          version: oldDraft.version,
+          actions: createGraphQlUpdateActions(actions),
+        },
+        context: {
+          target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
+        },
+      });
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: use-products-connector.js:127 ~ execute ~ error:',
+        error
+      );
+      throw error;
+    }
+  };
+
+  return { execute, loading };
 };

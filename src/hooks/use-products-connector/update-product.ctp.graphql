@@ -1,5 +1,9 @@
-query GetProductDetails($id: String) {
-  product(id: $id) {
+mutation updateProduct(
+  $id: String!
+  $version: Long!
+  $actions: [ProductUpdateAction!]!
+) {
+  updateProduct(id: $id, version: $version, actions: $actions) {
     id
     key
     skus

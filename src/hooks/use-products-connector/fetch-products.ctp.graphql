@@ -18,10 +18,11 @@ fragment CurrentProduct on ProductQueryResult {
   results {
     id
     masterData {
-      current {
+      staged {
         ...Product
       }
       published
+      hasStagedChanges
     }
     productType {
       key

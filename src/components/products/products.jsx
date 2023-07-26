@@ -1,6 +1,10 @@
 import { ContentNotification } from '@commercetools-uikit/notifications';
 import React, { useEffect } from 'react';
-import { getErrorMessage, toggleElementFromArray } from '../../helpers';
+import {
+  formatDateTime,
+  getErrorMessage,
+  toggleElementFromArray,
+} from '../../helpers';
 import { useProductsFetcher } from '../../hooks/use-products-connector';
 import Text from '@commercetools-uikit/text';
 import DataTable from '@commercetools-uikit/data-table';
@@ -30,6 +34,7 @@ import {
   DOMAINS,
   NOTIFICATION_KINDS_SIDE,
 } from '@commercetools-frontend/constants';
+import SelectableSearchInput from '@commercetools-uikit/selectable-search-input';
 
 const Products = () => {
   const { page, perPage } = usePaginationState();
@@ -42,14 +47,13 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState([]);
   const { push } = useHistory();
   const match = useRouteMatch();
-
   const showNotification = useShowNotification();
 
   const { getLocalName } = useLocalLang();
 
   const { updateProductAction } = useUpdateAction();
 
-  const { data, error, loading, refetch } = useProductsFetcher({
+  const { data, error, loading } = useProductsFetcher({
     page,
     perPage,
     tableSorting,
@@ -68,7 +72,7 @@ const Products = () => {
     switch (column.key) {
       case 'product_name':
         return getLocalName({
-          allLocales: item.masterData.current.nameAllLocales,
+          allLocales: item.masterData.staged.nameAllLocales,
           key: 'name',
         });
       case 'product_type':
@@ -78,20 +82,26 @@ const Products = () => {
       case 'status':
         return (
           <Stamp
-            tone={item.masterData.published ? 'primary' : 'critical'}
-            label={item.masterData.published ? 'Published' : 'Unpublished'}
+            tone={
+              item.masterData.hasStagedChanges
+                ? 'warning'
+                : item.masterData.published
+                ? 'primary'
+                : 'critical'
+            }
+            label={
+              item.masterData.hasStagedChanges
+                ? 'Modified'
+                : item.masterData.published
+                ? 'Published'
+                : 'Unpublished'
+            }
           />
         );
       case 'createdAt':
-        const date_created = new Date(item.createdAt);
-        return `${date_created.toDateString()} ${
-          date_created.toTimeString().split(' ')[0]
-        }`;
+        return formatDateTime(item.createdAt);
       case 'lastModifiedAt':
-        const date_modified = new Date(item.lastModifiedAt);
-        return `${date_modified.toDateString()} ${
-          date_modified.toTimeString().split(' ')[0]
-        }`;
+        return formatDateTime(item.lastModifiedAt);
 
       default:
         break;
@@ -134,6 +144,7 @@ const Products = () => {
                 id: row.id,
                 version: row.version,
                 isPublished: row.masterData.published,
+                stagedChanges: row.masterData.hasStagedChanges,
               },
             });
           }}
@@ -164,9 +175,22 @@ const Products = () => {
 
   return (
     <Spacings.Stack scale="l">
-      <Spacings.Stack scale="s">
+      <Spacings.Inline alignItems="flex-end" scale="s">
         <Text.Headline as="h2">Products</Text.Headline>
-        <Text.Body>All Products</Text.Body>
+        <Text.Body as="span">{data.total} results</Text.Body>
+      </Spacings.Inline>
+      <Spacings.Stack>
+        {' '}
+        <SelectableSearchInput
+          value={"value"}
+          onChange={(event) => alert(event.target.value)}
+          onSubmit={(val) => alert(val)}
+          onReset={() => alert('reset')}
+          options={[
+            { value: 'one', label: 'One' },
+            { value: 'two', label: 'Two' },
+          ]}
+        />
       </Spacings.Stack>
       <SpacingsInline justifyContent="space-between">
         <SpacingsInline alignItems="center">
@@ -217,7 +241,7 @@ const Products = () => {
                     action: e.target.value,
                     products: selectedProduct,
                   });
-                  refetch();
+                  // refetch();
                   setSelectedProduct([]);
                   setAction();
                   showNotification({
@@ -241,9 +265,6 @@ const Products = () => {
               <Text.Detail>product selected</Text.Detail>
             </>
           )}
-        </SpacingsInline>
-        <SpacingsInline>
-          <SelectInput></SelectInput>
         </SpacingsInline>
       </SpacingsInline>
       <Spacings.Stack scale="xs">

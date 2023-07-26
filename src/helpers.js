@@ -26,13 +26,27 @@ const getNameFromPayload = (payload) => ({
   name: transformLocalizedStringToLocalizedField(payload.name),
 });
 
+const getDescriptionFromPayload = (payload) => ({
+  description: transformLocalizedStringToLocalizedField(payload.description),
+});
+
 const convertAction = (actionName, actionPayload) => ({
   [actionName]:
     actionName === 'changeName'
       ? getNameFromPayload(actionPayload)
+      : actionName === 'setDescription'
+      ? getDescriptionFromPayload(actionPayload)
       : actionPayload,
 });
 
+/**
+ * will format the array of action object with the Graphql accepted form
+ *
+ * @param {{"action": "changeName","name": {"en": "Waterproof Photo Housing by Seasheller","de": "Wasserdichtes Foto Gehäuse von Seashell","hi-IN": ""}}}
+ *
+ * @return {[{"changeName": {"name": [{"locale": "de","value": "Wasserdichtes Foto Gehäuse von Seashell"},{"locale": "en","value": "Waterproof Photo Housing by Seasheller"},{"locale": "hi-IN","value": ""}]}}]}
+ *
+ */
 export const createGraphQlUpdateActions = (actions) =>
   actions.reduce(
     (previousActions, { action: actionName, ...actionPayload }) => [
@@ -45,6 +59,9 @@ export const createGraphQlUpdateActions = (actions) =>
 export const convertToActionData = (draft) => ({
   ...draft,
   name: transformLocalizedFieldToLocalizedString(draft.nameAllLocales || []),
+  description: transformLocalizedFieldToLocalizedString(
+    draft.descriptionAllLocales || []
+  ),
 });
 
 // /**
@@ -79,4 +96,19 @@ export const toggleElementFromArray = ({ array, setArray, value }) => {
     newArr
   );
   setArray(newArr);
+};
+
+/**
+ * To format UTC date Time String
+ *
+ * @param date String
+ *
+ * @return {formatedDate} String
+ *
+ */
+export const formatDateTime = (date) => {
+  const formatedDate = new Date(date);
+  return `${formatedDate.toDateString()} ${
+    formatedDate.toTimeString().split(' ')[0]
+  }`;
 };

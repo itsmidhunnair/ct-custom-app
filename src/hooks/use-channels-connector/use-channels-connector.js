@@ -50,11 +50,13 @@ export const useChannelDetailsFetcher = (channelId) => {
 };
 
 export const useChannelDetailsUpdater = () => {
+  
   const [updateChannelDetails, { loading }] = useMcMutation(
     UpdateChannelDetailsMutation
   );
 
   const syncStores = createSyncChannels();
+
   const execute = async ({ originalDraft, nextDraft }) => {
     const actions = syncStores.buildActions(
       nextDraft,

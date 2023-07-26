@@ -12,25 +12,13 @@ export const docToFormValues = (product, languages) => ({
   description: LocalizedTextInput.createLocalizedString(
     languages,
     transformLocalizedFieldToLocalizedString(
-      product?.masterData.staged.desc ?? []
+      product?.masterData.staged.descriptionAllLocales ?? []
     )
   ),
-  status: product?.masterData.published
-    ? 'published'
-    : product?.masterData.hasStagedChanges
-    ? 'modified'
-    : 'unpublished',
-
-  createdAt: `${new Date(product?.createdAt).toDateString()} ${
-    new Date(product?.createdAt).toTimeString().split(' ')[0]
-  }`,
-  lastModifiedAt: `${new Date(product?.lastModifiedAt).toDateString()} ${
-    new Date(product?.lastModifiedAt).toTimeString().split(' ')[0]
-  }`,
 });
 
 export const formValuesToDoc = (formValues) => ({
   key: formValues.key,
-  roles: formValues.roles,
   name: LocalizedTextInput.omitEmptyTranslations(formValues.name),
+  description: LocalizedTextInput.omitEmptyTranslations(formValues.description),
 });
