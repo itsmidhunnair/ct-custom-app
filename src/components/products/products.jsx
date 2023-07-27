@@ -19,7 +19,12 @@ import {
   usePaginationState,
 } from '@commercetools-uikit/hooks';
 import LoadingSpinner from '@commercetools-uikit/loading-spinner';
-import { Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import {
+  Switch,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+} from 'react-router-dom';
 import { SuspendedRoute } from '@commercetools-frontend/application-shell';
 import ChannelDetails from '../channel-details';
 import useLocalLang from '../../hooks/use-local-lang/useLocalLang';
@@ -35,6 +40,7 @@ import {
   NOTIFICATION_KINDS_SIDE,
 } from '@commercetools-frontend/constants';
 import SelectableSearchInput from '@commercetools-uikit/selectable-search-input';
+import useURLQuery from '../../hooks/common/useURLQuery';
 
 const Products = () => {
   const { page, perPage } = usePaginationState();
@@ -47,6 +53,10 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState([]);
   const { push } = useHistory();
   const match = useRouteMatch();
+
+  const urlQuery = useURLQuery();
+  // console.log('🚀 ~ file: products.jsx:51 ~ Products ~ search:', urlQuery.get("demo"));
+
   const showNotification = useShowNotification();
 
   const { getLocalName } = useLocalLang();
@@ -57,10 +67,18 @@ const Products = () => {
     page,
     perPage,
     tableSorting,
+    search: urlQuery.get('search'),
   });
 
-  // useEffect(() => {
-  // }, []);
+  const [products, setProducts] = useState();
+
+  useEffect(() => {
+    if (data) {
+      setProducts(data);
+    }
+  }, [data]);
+
+  console.log('🚀 ~ file: products.jsx:67 ~ Products ~ data:', data);
 
   // const rows = [
   //   { id: 'parasite', title: 'Parasite', country: 'South Korea' },
@@ -72,7 +90,7 @@ const Products = () => {
     switch (column.key) {
       case 'product_name':
         return getLocalName({
-          allLocales: item.masterData.staged.nameAllLocales,
+          allLocales: item.nameAllLocales,
           key: 'name',
         });
       case 'product_type':
@@ -83,16 +101,16 @@ const Products = () => {
         return (
           <Stamp
             tone={
-              item.masterData.hasStagedChanges
+              item.hasStagedChanges
                 ? 'warning'
-                : item.masterData.published
+                : item.published
                 ? 'primary'
                 : 'critical'
             }
             label={
-              item.masterData.hasStagedChanges
+              item.hasStagedChanges
                 ? 'Modified'
-                : item.masterData.published
+                : item.published
                 ? 'Published'
                 : 'Unpublished'
             }
@@ -119,10 +137,10 @@ const Products = () => {
           isChecked={selectedProduct.length === perPage.value}
           onChange={(e) => {
             if (e.target.checked) {
-              const ids = data.results.map((item) => ({
+              const ids = products.results.map((item) => ({
                 id: item.id,
                 version: item.version,
-                isPublished: item.masterData.published,
+                isPublished: item.published,
               }));
               setSelectedProduct(ids);
             } else {
@@ -143,8 +161,8 @@ const Products = () => {
               value: {
                 id: row.id,
                 version: row.version,
-                isPublished: row.masterData.published,
-                stagedChanges: row.masterData.hasStagedChanges,
+                isPublished: row.published,
+                stagedChanges: row.hasStagedChanges,
               },
             });
           }}
@@ -177,15 +195,14 @@ const Products = () => {
     <Spacings.Stack scale="l">
       <Spacings.Inline alignItems="flex-end" scale="s">
         <Text.Headline as="h2">Products</Text.Headline>
-        <Text.Body as="span">{data.total} results</Text.Body>
+        <Text.Body as="span">{products?.total} results</Text.Body>
       </Spacings.Inline>
       <Spacings.Stack>
         {' '}
         <SelectableSearchInput
-          value={"value"}
-          onChange={(event) => alert(event.target.value)}
+          value={'value'}
           onSubmit={(val) => alert(val)}
-          onReset={() => alert('reset')}
+          // onReset={()=>{}}
           options={[
             { value: 'one', label: 'One' },
             { value: 'two', label: 'Two' },
@@ -268,11 +285,11 @@ const Products = () => {
         </SpacingsInline>
       </SpacingsInline>
       <Spacings.Stack scale="xs">
-        {data ? (
+        {products ? (
           <>
             <DataTableManager columns={columns}>
               <DataTable
-                rows={data.results}
+                rows={products.results}
                 columns={columns}
                 itemRenderer={(item, column) => itemRenderer(item, column)}
                 sortedBy={tableSorting.key}
@@ -284,7 +301,7 @@ const Products = () => {
               ></DataTable>
             </DataTableManager>
             <Pagination
-              totalItems={data.total}
+              totalItems={products.total}
               page={page.value}
               perPage={perPage.value}
               onPageChange={page.onChange}

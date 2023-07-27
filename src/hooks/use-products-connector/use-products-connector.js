@@ -7,26 +7,41 @@ import { GRAPHQL_TARGETS } from '@commercetools-frontend/constants';
 import FetchProducts from './fetch-products.ctp.graphql';
 import GetProductDetails from './fetch-product-details.ctp.graphql';
 import UpdateProduct from './update-product.ctp.graphql';
+import searchProducts from './fetch-searched-products.ctp.graphql';
 import { createSyncProducts } from '@commercetools/sync-actions';
 import { convertToActionData, createGraphQlUpdateActions } from '../../helpers';
+import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
 
 /**
  * To Fetch all Products
  *
  * @returns
  */
-export const useProductsFetcher = ({ page, perPage, tableSorting }) => {
+export const useProductsFetcher = ({ page, perPage, tableSorting, search }) => {
+  const { dataLocale, projectLanguages } = useApplicationContext((context) => ({
+    dataLocale: context.dataLocale ?? '',
+    projectLanguages: context.project?.languages ?? [],
+  }));
+
   const { data, loading, error, refetch } = useMcQuery(FetchProducts, {
     variables: {
       limit: perPage.value,
       offset: (page.value - 1) * perPage.value,
       sort: [`${tableSorting.value.key} ${tableSorting.value.order}`],
+      locale: dataLocale,
+      text: search || '',
     },
     context: {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
+    fetchPolicy: 'no-cache',
+    nextFetchPolicy: 'no-cache',
   });
-  return { data: data?.products, loading, error, refetch };
+  // console.log(
+  //   '🚀 ~ file: use-products-connector.js:39 ~ useProductsFetcher ~ data?.productProjectionSearch:',
+  //   data?.productProjectionSearch
+  // );
+  return { data: data?.productProjectionSearch, loading, error, refetch };
 };
 
 /**
@@ -58,14 +73,6 @@ export const useUpdateAction = () => {
    * @param {{action:('publish'|'unpublish'), products:[{id:String, version:Int16Array, isPublished:boolean}]}}
    */
   const updateProductAction = async ({ action, products }) => {
-    console.log(
-      '🚀 ~ file: use-products-connector.js:61 ~ updateProductAction ~ action:',
-      action
-    );
-    console.log(
-      '🚀 ~ file: use-products-connector.js:61 ~ updateProductAction ~ products:',
-      products
-    );
     const filteredProducts = products.filter(
       (product) =>
         product?.isPublished !== (action === 'publish' ? true : false) ||
@@ -144,3 +151,22 @@ export const useProductDetailsUpdater = () => {
 
   return { execute, loading };
 };
+
+/**
+ * Hook to find product based on search string
+ */
+// const useSearchProduct = async ({ page, perPage, tableSorting }) => {
+//   const { data, loading, error, refetch } = useMcQuery(searchProducts, {
+//     variables: {
+//       limit: 20,
+//       offset: 1,
+//       locale: 'EN',
+//       staged: true,
+//       text: 'shirt',
+//     },
+//     context: {
+//       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
+//     },
+//   });
+//   return { data: data?.products, loading, error, refetch };
+// };

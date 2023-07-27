@@ -99,11 +99,17 @@ const ProductDetails = (props) => {
 
   useEffect(() => {
     setModified(
-      product?.masterData.hasStagedChanges
+      !product?.masterData.published
+        ? 'unpublish'
+        : product?.masterData.hasStagedChanges
         ? 'modified'
-        : product?.masterData.published
-        ? 'publish'
-        : 'unpublish'
+        : 'publish'
+
+      // product?.masterData.published
+      //   ? !product?.masterData.hasStagedChanges
+      //     ? 'publish'
+      //     : 'modified'
+      //   : 'unpublish'
     );
   }, [product]);
 

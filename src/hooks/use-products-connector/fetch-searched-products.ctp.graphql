@@ -1,17 +1,17 @@
-query FetchProducts(
+query searchProducts(
   $locale: Locale!
+  $staged: Boolean!
   $limit: Int!
   $offset: Int
-  $text: String
-  $sort: [String!]
+  $text: String!
+  $sorts: [String!]
 ) {
   productProjectionSearch(
     locale: $locale
-    staged: true
+    staged: $staged
     limit: $limit
     offset: $offset
     text: $text
-    sorts: $sort
   ) {
     total
     count
@@ -23,18 +23,7 @@ query FetchProducts(
         locale
         value
       }
-      masterVariant {
-        sku
-      }
-      published
-      hasStagedChanges
-      productType {
-        key
-        name
-      }
-      version
-      createdAt
-      lastModifiedAt
+      
     }
   }
 }
