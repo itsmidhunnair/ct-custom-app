@@ -4,6 +4,7 @@ import Channels from './components/channels';
 import Welcome from './components/welcome';
 import Products from './components/products';
 import ProductDetails from './components/product-details';
+import Report from './components/Reports/Report';
 
 const ApplicationRoutes = () => {
   const match = useRouteMatch();
@@ -29,6 +30,9 @@ const ApplicationRoutes = () => {
         </Route>
         <Route path={`${match.path}/products`}>
           <Products linkToWelcome={match.url} />
+        </Route>
+        <Route path={`${match.path}/reports`}>
+          <Report linkToWelcome={match.url} />
         </Route>
         <Route>
           <Welcome />

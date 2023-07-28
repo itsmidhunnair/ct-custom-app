@@ -4,7 +4,7 @@ import { PERMISSIONS, entryPointUriPath } from './src/constants';
  * @type {import('@commercetools-frontend/application-config').ConfigOptions}
  */
 const config = {
-  name: 'Custom App Admin',
+  name: 'Custom App Demo',
   entryPointUriPath,
   cloudIdentifier: 'gcp-au',
   env: {
@@ -12,8 +12,8 @@ const config = {
       initialProjectKey: 'demo-project-krish',
     },
     production: {
-      applicationId: 'TODO',
-      url: 'https://ct-custom-app-seven.vercel.app',
+      applicationId: 'clkcmuc1w0002rs01ko63u0vv',
+      url: 'https://custom-app-ct-demo.web.app',
     },
   },
   oAuthScopes: {
@@ -36,6 +36,12 @@ const config = {
     {
       uriPath: 'products',
       defaultLabel: 'Products',
+      labelAllLocales: [],
+      permissions: [PERMISSIONS.View],
+    },
+    {
+      uriPath: 'reports',
+      defaultLabel: 'Reports',
       labelAllLocales: [],
       permissions: [PERMISSIONS.View],
     },
