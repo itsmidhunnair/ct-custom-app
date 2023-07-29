@@ -8,9 +8,14 @@ const useReport = ({ startDate, endDate }) => {
   const oldCartStartDate = dayjs(startDate)
     .subtract(14, 'D')
     .format('YYYY-MM-DD');
+
   const oldCartEndDate = dayjs(endDate).subtract(14, 'D').format('YYYY-MM-DD');
 
-  console.log(oldCartStartDate, oldCartEndDate);
+  console.log(
+    '🚀 ~ file: useReport.js:9 ~ useReport ~ oldCartStartDate:',
+    oldCartStartDate,
+    oldCartEndDate
+  );
 
   const { data, error, loading } = useMcQuery(fetchOrderAndCart, {
     variables: {
@@ -24,6 +29,7 @@ const useReport = ({ startDate, endDate }) => {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
   });
+  console.log("🚀 ~ file: useReport.js:32 ~ useReport ~ data:", data)
 
   return {
     abandonedCarts: data?.abandonedCarts,

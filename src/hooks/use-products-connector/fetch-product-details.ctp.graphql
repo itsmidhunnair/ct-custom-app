@@ -1,4 +1,4 @@
-query GetProductDetails($id: String) {
+query GetProductDetails($id: String)   {
   product(id: $id) {
     id
     key
