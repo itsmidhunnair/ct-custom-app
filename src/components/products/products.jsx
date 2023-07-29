@@ -53,6 +53,7 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState([]);
   const { push } = useHistory();
   const match = useRouteMatch();
+  console.log('🚀 ~ file: products.jsx:56 ~ Products ~ match:', match);
 
   const urlQuery = useURLQuery();
   // console.log('🚀 ~ file: products.jsx:51 ~ Products ~ search:', urlQuery.get("demo"));
@@ -200,9 +201,13 @@ const Products = () => {
       <Spacings.Stack>
         {' '}
         <SelectableSearchInput
-          value={'value'}
-          onSubmit={(val) => alert(val)}
-          // onReset={()=>{}}
+          value={{ text: urlQuery.get('search') }}
+          onSubmit={(val) => {
+            push(`?search=${val.text}`);
+          }}
+          onReset={() => {
+            push(match.url);
+          }}
           options={[
             { value: 'one', label: 'One' },
             { value: 'two', label: 'Two' },

@@ -3,11 +3,11 @@ import { Chart as ChartJs } from 'chart.js/auto';
 import { Line } from 'react-chartjs-2';
 import Card from '@commercetools-uikit/card';
 
-import { map, uniq, groupBy, countBy } from 'lodash';
-
-import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import dayjs from 'dayjs';
+import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import useReport from '../../hooks/useReport/useReport';
+import { dateCountXYcoordinates } from './helpers';
+import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 
 const Report = () => {
   const { abandonedCarts, error, loading, soldCarts } = useReport({
@@ -15,68 +15,21 @@ const Report = () => {
     endDate: '2023-05-31',
   });
 
-  // ---------- Operations related to Abandoned Cart -------------------//
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   /**
-   * To Format abandoned cart date in YYYY-MM-DD format
+   * Creates X,Y coordinates for Order Data
    */
-  let formatAbandonedCartDate = abandonedCarts?.results.map((cart) => ({
-    lastModifiedAt: dayjs(cart.lastModifiedAt).format('YYYY-MM-DD'),
-  }));
-  console.log(
-    '🚀 ~ file: Report.jsx:182 ~ abandonedCartDateWithCount ~ formatAbandonedCartDate:',
-    formatAbandonedCartDate
-  );
+  const orderCountWithDate = dateCountXYcoordinates(soldCarts?.results);
 
   /**
-   * creates array of object with unique date and the count date existed
+   * Creates X,Y coordinates for Abandoned Data
    */
-  const abandonedCountWithDate = map(
-    countBy(formatAbandonedCartDate, 'lastModifiedAt'),
-    (value, date) => ({ x: date, y: value })
+  const abandonedCountWithDate = dateCountXYcoordinates(
+    abandonedCarts?.results
   );
-
-  console.log(
-    '🚀 ~ file: Report.jsx:180 ~ Report ~ abandonedCountWithDate:',
-    abandonedCountWithDate
-  );
-
-  // ---------- Operations related to Abandoned Cart -------------------//
-
-  // ---------- Operations related to Orders ---------------------------//
-
-  /**
-   * To Format abandoned cart date in YYYY-MM-DD format
-   */
-  let formatOrderDate = soldCarts?.results.map((cart) => ({
-    createdAt: dayjs(cart.createdAt).format('YYYY-MM-DD'),
-  }));
-  console.log(
-    '🚀 ~ file: Report.jsx:182 ~ abandonedCartDateWithCount ~ formatOrderDate:',
-    formatOrderDate
-  );
-
-  /**
-   * creates array of object with unique date and the count date existed
-   */
-  const orderCountWithDate = map(
-    countBy(formatOrderDate, 'createdAt'),
-    (value, date) => ({ x: date, y: value })
-  );
-
-  console.log(
-    '🚀 ~ file: Report.jsx:180 ~ Report ~ orderCountWithDate:',
-    orderCountWithDate
-  );
-
-  // ---------- Operations related to Orders ---------------------------//
-
-  // //----- Graph Gradient Config ---------
-  // var gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  // gradient.addColorStop(0, 'rgba(250,174,50,1)');
-  // gradient.addColorStop(1, 'rgba(250,174,50,0)');
-
-  // //----- Graph Gradient Config ---------
 
   return (
     <>
@@ -182,26 +135,15 @@ const Report = () => {
                   to: 0.4,
                 },
               },
-
-              // type: 'time',
-              //       distribution: 'linear',
-              //       time: {
-              //         unit: 'hour',
-              //         stepSize: 2,
-              //       },
-              //     },
-              // scales: {
-              //   xAxes: [
-              //     {
-              //       type: 'time',
-              //       distribution: 'linear',
-              //       time: {
-              //         unit: 'hour',
-              //         stepSize: 2,
-              //       },
-              //     },
-              //   ],
-              // },
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    title: (context) => {
+                      return dayjs(context[0]?.label).format('D MMM YY, ddd');
+                    },
+                  },
+                },
+              },
             }}
           />
         </Card>
