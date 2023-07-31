@@ -2,19 +2,35 @@ import { PageContentFull } from '@commercetools-frontend/application-components'
 import { Chart as ChartJs } from 'chart.js/auto';
 import { Line } from 'react-chartjs-2';
 import Card from '@commercetools-uikit/card';
-
+import { merge } from 'lodash';
 import dayjs from 'dayjs';
 import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import useReport from '../../hooks/useReport/useReport';
-import { dateCountXYcoordinates } from './helpers';
+import { dateCountXYcoordinates, mergeArrayOfObj } from './helpers';
 import LoadingSpinner from '@commercetools-uikit/loading-spinner';
+import SelectField from '@commercetools-uikit/select-field';
+import { useState } from 'react';
+import {
+  getCurrMonth,
+  getCurrWeek,
+  getCurrYear,
+  getPrevMonth,
+  getPrevWeek,
+  getPrevYear,
+} from './generateDate';
 
 const Report = () => {
+  const [dateTobeFetched, setDateTobeFetched] = useState(getCurrWeek());
+
   const { abandonedCarts, error, loading, soldCarts } = useReport({
-    startDate: '2023-05-01',
-    endDate: '2023-05-31',
+    startDate: dateTobeFetched.start,
+    endDate: dateTobeFetched.end,
   });
 
+  console.log(
+    '🚀 ~ file: Report.jsx:17 ~ Report ~ dateTobeFetched:',
+    dateTobeFetched
+  );
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -31,16 +47,61 @@ const Report = () => {
     abandonedCarts?.results
   );
 
+  /**
+   * Merging both array
+   */
+  const mergedArray = mergeArrayOfObj(
+    orderCountWithDate,
+    abandonedCountWithDate
+  );
+
+  const options = [
+    {
+      label: getCurrWeek({ type: 'label' }),
+      value: getCurrWeek(),
+    },
+    {
+      label: getPrevWeek({ type: 'label' }),
+      value: getPrevWeek(),
+    },
+    {
+      label: getCurrMonth({ type: 'label' }),
+      value: getCurrMonth(),
+    },
+    {
+      label: `From ${getPrevMonth({ type: 'label' }).start} to ${
+        getPrevMonth({ type: 'label' }).end
+      }`,
+      value: getPrevMonth(),
+    },
+    {
+      label: getCurrYear({ type: 'label' }),
+      value: getCurrYear(),
+    },
+    {
+      label: getPrevYear({ type: 'label' }),
+      value: getPrevYear(),
+    },
+  ];
+
   return (
     <>
       <PageContentFull>
+        <SelectField
+          title="State"
+          value="ready"
+          options={options}
+          onChange={(e) => {}}
+        />
         <Card theme="dark" type="raised">
           <Line
+            // ref={(reference) => (reference )}
             data={{
+              labels: mergedArray.map((item) => item.date),
               datasets: [
                 {
                   label: 'Ordered',
-                  data: orderCountWithDate,
+                  data: mergedArray.map((item) => item.orders),
                   borderWidth: 1,
                   fill: true,
                   borderColor: '#008071',
@@ -55,7 +116,7 @@ const Report = () => {
                 },
                 {
                   label: 'Abandoned',
-                  data: abandonedCountWithDate,
+                  data: mergedArray.map((item) => item.carts),
                   borderWidth: 1,
                   fill: true,
                   borderColor: '#4f5056',
@@ -77,14 +138,14 @@ const Report = () => {
                 },
               },
               interaction: {
-                mode: 'x',
+                mode: 'index',
                 intersect: false,
               },
               scales: {
                 x: {
                   type: 'time',
                   time: {
-                    unit: 'day',
+                    unit: 'month',
                   },
                   grid: {
                     display: true,
@@ -92,7 +153,7 @@ const Report = () => {
                   },
                   ticks: {
                     autoSkip: true,
-                    sampleSize: 10,
+                    sampleSize: 50,
                     major: {
                       enabled: true,
                     },
@@ -116,7 +177,6 @@ const Report = () => {
                     display: true,
                     text: 'Count',
                   },
-
                   border: {
                     display: true,
                     dash: [15, 5],

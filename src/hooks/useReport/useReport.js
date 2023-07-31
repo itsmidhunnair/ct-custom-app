@@ -11,13 +11,13 @@ const useReport = ({ startDate, endDate }) => {
    * Will give 14 days prior to startDate
    */
   const oldCartStartDate = dayjs(startDate)
-    .subtract(14, 'D')
+    .subtract(14, 'd')
     .format('YYYY-MM-DD');
 
   /**
    * Will give 14 days prior to endDate
    */
-  const oldCartEndDate = dayjs(endDate).subtract(14, 'D').format('YYYY-MM-DD');
+  const oldCartEndDate = dayjs(endDate).subtract(14, 'd').format('YYYY-MM-DD');
 
   //-----------------------------------------------------------------------------------------
 
@@ -37,6 +37,7 @@ const useReport = ({ startDate, endDate }) => {
       target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
     },
   });
+  console.log('🚀 ~ file: useReport.js:40 ~ useReport ~ data:', data);
 
   return {
     abandonedCarts: data?.abandonedCarts,
