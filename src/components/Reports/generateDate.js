@@ -1,17 +1,18 @@
 import dayjs from 'dayjs';
 
-let dateFormat = 'YYYY-MM-DD';
 /**
  * To generate current week date span (Sun -Sat)
  * @param {{type:'value'|'label'}}
  */
 const getCurrWeek = ({ type = 'value' } = '') => {
   if (type && type === 'label') {
-    dateFormat = 'DD-MMM-YYYY';
+    return `This Week - ${dayjs()
+      .startOf('week')
+      .format('DD-MMM-YYYY')} to ${dayjs().endOf('week').format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('week').format(dateFormat),
-    end: dayjs().endOf('week').format(dateFormat),
+    start: dayjs().startOf('week').format('YYYY-MM-DD'),
+    end: dayjs().endOf('week').format('YYYY-MM-DD'),
   };
 };
 
@@ -21,11 +22,17 @@ const getCurrWeek = ({ type = 'value' } = '') => {
  */
 const getPrevWeek = ({ type = 'value' } = '') => {
   if (type === 'label') {
-    dateFormat = 'DD-MMM-YYYY';
+    return `Previous week - ${dayjs()
+      .startOf('week')
+      .subtract(1, 'week')
+      .format('DD-MMM-YYYY')} to ${dayjs()
+      .endOf('week')
+      .subtract(1, 'week')
+      .format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('week').subtract(1, 'week').format(dateFormat),
-    end: dayjs().endOf('week').subtract(1, 'week').format(dateFormat),
+    start: dayjs().startOf('week').subtract(1, 'week').format('YYYY-MM-DD'),
+    end: dayjs().endOf('week').subtract(1, 'week').format('YYYY-MM-DD'),
   };
 };
 
@@ -35,11 +42,13 @@ const getPrevWeek = ({ type = 'value' } = '') => {
  */
 const getCurrMonth = ({ type = 'value' } = '') => {
   if (type === 'label') {
-    dateFormat = 'DD-MMM-YYYY';
+    return `This month - ${dayjs()
+      .startOf('month')
+      .format('DD-MMM-YYYY')} to ${dayjs().endOf('month').format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('month').format(dateFormat),
-    end: dayjs().endOf('month').format(dateFormat),
+    start: dayjs().startOf('month').format('YYYY-MM-DD'),
+    end: dayjs().endOf('month').format('YYYY-MM-DD'),
   };
 };
 
@@ -49,11 +58,17 @@ const getCurrMonth = ({ type = 'value' } = '') => {
  */
 const getPrevMonth = ({ type = 'value' } = '') => {
   if (type === 'label') {
-    dateFormat = 'DD-MMM-YYYY';
+    return `Previous month - ${dayjs()
+      .startOf('month')
+      .subtract(1, 'month')
+      .format('DD-MMM-YYYY')} to ${dayjs()
+      .endOf('month')
+      .subtract(1, 'month')
+      .format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('month').subtract(1, 'month').format(dateFormat),
-    end: dayjs().endOf('month').subtract(1, 'month').format(dateFormat),
+    start: dayjs().startOf('month').subtract(1, 'month').format('YYYY-MM-DD'),
+    end: dayjs().endOf('month').subtract(1, 'month').format('YYYY-MM-DD'),
   };
 };
 
@@ -63,11 +78,13 @@ const getPrevMonth = ({ type = 'value' } = '') => {
  */
 const getCurrYear = ({ type = 'value' } = '') => {
   if (type === 'label') {
-    dateFormat = 'DD-MMM-YYYY';
+    return `This year - ${dayjs()
+      .startOf('year')
+      .format('DD-MMM-YYYY')} to ${dayjs().endOf('year').format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('year').format(dateFormat),
-    end: dayjs().endOf('year').format(dateFormat),
+    start: dayjs().startOf('year').format('YYYY-MM-DD'),
+    end: dayjs().endOf('year').format('YYYY-MM-DD'),
   };
 };
 
@@ -77,11 +94,17 @@ const getCurrYear = ({ type = 'value' } = '') => {
  */
 const getPrevYear = ({ type = 'value' } = '') => {
   if (type === 'label') {
-    dateFormat = '';
+    return `Previous year - ${dayjs()
+      .startOf('year')
+      .subtract(1, 'year')
+      .format('DD-MMM-YYYY')} to ${dayjs()
+      .endOf('year')
+      .subtract(1, 'year')
+      .format('DD-MMM-YYYY')}`;
   }
   return {
-    start: dayjs().startOf('year').subtract(1, 'year').format(dateFormat),
-    end: dayjs().endOf('year').subtract(1, 'year').format(dateFormat),
+    start: dayjs().startOf('year').subtract(1, 'year').format('YYYY-MM-DD'),
+    end: dayjs().endOf('year').subtract(1, 'year').format('YYYY-MM-DD'),
   };
 };
 

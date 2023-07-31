@@ -58,29 +58,27 @@ const Report = () => {
   const options = [
     {
       label: getCurrWeek({ type: 'label' }),
-      value: getCurrWeek(),
+      value: JSON.stringify(getCurrWeek()),
     },
     {
       label: getPrevWeek({ type: 'label' }),
-      value: getPrevWeek(),
+      value: JSON.stringify(getPrevWeek()),
     },
     {
       label: getCurrMonth({ type: 'label' }),
-      value: getCurrMonth(),
+      value: JSON.stringify(getCurrMonth()),
     },
     {
-      label: `From ${getPrevMonth({ type: 'label' }).start} to ${
-        getPrevMonth({ type: 'label' }).end
-      }`,
-      value: getPrevMonth(),
+      label: getPrevMonth({ type: 'label' }),
+      value: JSON.stringify(getPrevMonth()),
     },
     {
       label: getCurrYear({ type: 'label' }),
-      value: getCurrYear(),
+      value: JSON.stringify(getCurrYear()),
     },
     {
       label: getPrevYear({ type: 'label' }),
-      value: getPrevYear(),
+      value: JSON.stringify(getPrevYear()),
     },
   ];
 
@@ -89,9 +87,15 @@ const Report = () => {
       <PageContentFull>
         <SelectField
           title="State"
-          value="ready"
+          value={JSON.stringify(dateTobeFetched)}
           options={options}
-          onChange={(e) => {}}
+          onChange={(e) => {
+            console.log(
+              '🚀 ~ file: Report.jsx:93 ~ Report ~ e:',
+              e.target.value
+            );
+            setDateTobeFetched(JSON.parse(e.target.value));
+          }}
         />
         <Card theme="dark" type="raised">
           <Line

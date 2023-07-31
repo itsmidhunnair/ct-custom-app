@@ -25,7 +25,7 @@ const dateCountXYcoordinates = (dateArray) => {
   // formatCartDate
   // );
 
-  if (dateArray[0]?.lastModifiedAt) {
+  if (dateArray && dateArray[0]?.lastModifiedAt) {
     formatCartDate = formatCartDate.map((cartDate) => ({
       date: dayjs(cartDate.date).add(14, 'd').format('YYYY-MM-DD'),
     }));
@@ -34,7 +34,7 @@ const dateCountXYcoordinates = (dateArray) => {
   /**
    * creates array of object with unique date and the count date existed
    */
-  if (dateArray[0]?.createdAt) {
+  if (dateArray && dateArray[0]?.createdAt) {
     const countWithDate = map(
       countBy(formatCartDate, 'date'),
       (value, date) => ({
@@ -46,7 +46,7 @@ const dateCountXYcoordinates = (dateArray) => {
 
     return countWithDate;
   }
-  if (dateArray[0]?.lastModifiedAt) {
+  if (dateArray && dateArray[0]?.lastModifiedAt) {
     const countWithDate = map(
       countBy(formatCartDate, 'date'),
       (value, date) => ({
